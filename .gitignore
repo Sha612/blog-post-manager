@@ -26,3 +26,7 @@ blob-report/
 .vscode/*
 !.vscode/extensions.json
 *.log
+
+# Deployment and secrets
+.vercel
+*.pem
