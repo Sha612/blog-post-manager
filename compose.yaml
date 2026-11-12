@@ -31,6 +31,8 @@ services:
       target: migrate
     environment:
       DATABASE_URL: *database-url
+      # Adds demo posts to an empty database. Set to false to start empty.
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
     depends_on:
       db:
         condition: service_healthy

@@ -4,6 +4,7 @@ packages:
 allowBuilds:
   "@prisma/engines": true
   prisma: true
+  esbuild: true
   sharp: false
   unrs-resolver: false
   # Install analytics pulled in by swagger-ui-dist; never run it.
