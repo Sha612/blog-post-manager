@@ -1,0 +1,14 @@
+# Keep the build context small and never copy host builds or secrets.
+# node_modules from macOS must not reach a Linux image.
+**/node_modules
+**/dist
+**/.next
+**/coverage
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+!**/.env.example
+apps/api/src/generated
+.git
+playwright-report
+test-results
