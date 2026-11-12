@@ -4,5 +4,14 @@ packages:
 allowBuilds:
   "@prisma/engines": true
   prisma: true
+  esbuild: true
   sharp: false
   unrs-resolver: false
+  # Install analytics pulled in by swagger-ui-dist; never run it.
+  "@scarf/scarf": false
+  # Pulled in by Testcontainers: a version-scheme warning and optional
+  # native add-ons for SSH, which talking to the local Docker socket
+  # doesn't use.
+  protobufjs: false
+  cpu-features: false
+  ssh2: false

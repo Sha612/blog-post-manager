@@ -26,11 +26,14 @@ FROM deps AS build
 COPY apps/api apps/api
 RUN pnpm --filter @blog/api run build
 
-# ---- migrate: one-off job that applies database migrations ----------------
+# ---- migrate: one-off job that applies migrations, then seeds demo data ---
 FROM build AS migrate
 WORKDIR /repo/apps/api
+# Put the project's CLIs (prisma, and tsx for the seed command) on PATH.
+ENV PATH=/repo/apps/api/node_modules/.bin:$PATH
 USER node
-CMD ["./node_modules/.bin/prisma", "migrate", "deploy"]
+# The seed only writes to an empty database and honours SEED_DEMO_DATA=false.
+CMD ["sh", "-c", "prisma migrate deploy && prisma db seed"]
 
 # ---- prod-deps: production dependencies only ------------------------------
 FROM base AS prod-deps
