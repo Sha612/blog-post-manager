@@ -9,6 +9,9 @@ out/
 *.tsbuildinfo
 next-env.d.ts
 
+# Generated code
+apps/api/src/generated/
+
 # Environment files
 .env
 .env.*
