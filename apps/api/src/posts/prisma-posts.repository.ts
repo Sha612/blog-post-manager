@@ -25,7 +25,7 @@ export class PrismaPostsRepository extends PostsRepository {
 
   async findPage({ page, pageSize, search }: PostQuery): Promise<PostPage> {
     const where: Prisma.PostWhereInput = search
-      ? { title: { contains: search, mode: 'insensitive' } }
+      ? { title: { contains: escapeLikePattern(search), mode: 'insensitive' } }
       : {};
 
     // Both queries run in one transaction, so the page and the total agree.
@@ -79,6 +79,16 @@ export class PrismaPostsRepository extends PostsRepository {
     const { count } = await this.prisma.post.deleteMany({ where: { id } });
     return count > 0;
   }
+}
+
+/**
+ * Prisma's `contains` becomes ILIKE '%term%' without escaping the term, so
+ * % and _ typed by a user would act as wildcards ("100%" would also match
+ * "1000"). Escape them, and the escape character itself, so they match
+ * literally.
+ */
+export function escapeLikePattern(term: string): string {
+  return term.replace(/[\\%_]/g, '\\$&');
 }
 
 function isRecordNotFound(error: unknown): boolean {

@@ -115,6 +115,27 @@ describe('Posts API (e2e)', () => {
       expect(response.body.data[0].title).toBe('Learning NestJS');
     });
 
+    it('treats % and _ in the search term as plain characters', async () => {
+      await createPost('Growth of 100% this year');
+      await createPost('Growth of 1000 this year');
+      await createPost('Naming user_id columns');
+      await createPost('Naming userXid columns');
+
+      const percent = await api()
+        .get('/api/posts')
+        .query({ q: '100%' })
+        .expect(200);
+      const underscore = await api()
+        .get('/api/posts')
+        .query({ q: 'user_id' })
+        .expect(200);
+
+      const titles = (response: request.Response) =>
+        response.body.data.map((post: { title: string }) => post.title);
+      expect(titles(percent)).toEqual(['Growth of 100% this year']);
+      expect(titles(underscore)).toEqual(['Naming user_id columns']);
+    });
+
     it('rejects a page size above the limit', async () => {
       await api().get('/api/posts').query({ pageSize: 500 }).expect(400);
     });
