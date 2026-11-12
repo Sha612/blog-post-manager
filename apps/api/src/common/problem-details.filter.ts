@@ -38,6 +38,11 @@ export class ProblemDetailsFilter implements ExceptionFilter {
       detail: detailOf(exception, status),
       instance: request.originalUrl,
     };
+    // Set by the request logger; lets support find the matching log lines.
+    const requestId = request.id;
+    if (typeof requestId === 'string' || typeof requestId === 'number') {
+      problem.requestId = String(requestId);
+    }
     if (exception instanceof RequestValidationException) {
       problem.errors = exception.errors;
     }
@@ -54,6 +59,8 @@ function statusOf(exception: unknown): number {
   if (exception instanceof HttpException) {
     return exception.getStatus();
   }
+  // Errors from Express middleware (e.g. body-parser: invalid JSON, payload
+  // too large) carry an HTTP status of their own.
   const status = (exception as { status?: unknown } | null)?.status;
   if (typeof status === 'number' && status >= 400 && status < 600) {
     return status;

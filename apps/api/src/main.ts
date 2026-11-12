@@ -5,7 +5,8 @@ import { configureApp } from './app.setup.js';
 import type { Env } from './config/env.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Buffer startup logs until the pino logger is installed in configureApp.
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
   configureApp(app);
 
   const config = app.get<ConfigService<Env, true>>(ConfigService);
