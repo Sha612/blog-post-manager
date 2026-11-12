@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { z } from 'zod';
 
 export interface FieldError {
   /** Dot-separated path of the invalid field, e.g. "title". */
@@ -19,6 +20,19 @@ export interface ProblemDetails {
   requestId?: string;
   errors?: FieldError[];
 }
+
+/** Describes ProblemDetails in the OpenAPI document. */
+export const problemDetailsSchema = z.object({
+  type: z.string(),
+  title: z.string(),
+  status: z.number().int(),
+  detail: z.string(),
+  instance: z.string(),
+  requestId: z.string().optional(),
+  errors: z
+    .array(z.object({ field: z.string().optional(), message: z.string() }))
+    .optional(),
+});
 
 /** Thrown by the validation pipe; carries one entry per invalid field. */
 export class RequestValidationException extends BadRequestException {
