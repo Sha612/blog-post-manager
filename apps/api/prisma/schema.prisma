@@ -1,0 +1,28 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// A blog post. `version` increases by one on every update and backs
+/// optimistic concurrency control: an edit based on an old version is
+/// rejected with 409 Conflict instead of silently overwriting newer data.
+model Post {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String   @db.VarChar(120)
+  content   String
+  version   Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([createdAt])
+  @@map("posts")
+}
