@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 /**
  * Every environment variable the API reads, validated once at startup.
  * A missing or malformed value stops the process with a clear message
@@ -12,5 +13,10 @@ export const envSchema = z.object({
   DATABASE_URL: z
     .string()
     .regex(/^postgres(ql)?:\/\//, 'must be a PostgreSQL connection URL'),
+  LOG_LEVEL: z
+    .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
+    .default('info'),
+  RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(100),
 });
+
 export type Env = z.infer<typeof envSchema>;

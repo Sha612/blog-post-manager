@@ -1,4 +1,5 @@
 import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 export interface HealthStatus {
@@ -8,8 +9,10 @@ export interface HealthStatus {
 
 /**
  * Readiness check used by Docker Compose and CI: the API counts as healthy
- * only when it can reach the database.
+ * only when it can reach the database. Probes poll it constantly, so it
+ * is exempt from rate limiting.
  */
+@SkipThrottle()
 @Controller('health')
 export class HealthController {
   constructor(private readonly prisma: PrismaService) {}

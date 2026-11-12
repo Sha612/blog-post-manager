@@ -44,7 +44,7 @@ export class PostsService {
 
   async create(data: NewPost): Promise<Post> {
     const post = await this.posts.create(data);
-    this.logger.log({ event: 'post.created', postId: post.id });
+    this.logger.log({ postId: post.id }, 'post.created');
     return post;
   }
 
@@ -64,22 +64,14 @@ export class PostsService {
       changes,
     );
     if (updated) {
-      this.logger.log({
-        event: 'post.updated',
-        postId: id,
-        version: updated.version,
-      });
+      this.logger.log({ postId: id, version: updated.version }, 'post.updated');
       return updated;
     }
 
     if (!(await this.posts.exists(id))) {
       throw new PostNotFoundException(id);
     }
-    this.logger.warn({
-      event: 'post.version_conflict',
-      postId: id,
-      expectedVersion,
-    });
+    this.logger.warn({ postId: id, expectedVersion }, 'post.version_conflict');
     throw new PostVersionConflictException(id, expectedVersion);
   }
 
@@ -88,6 +80,6 @@ export class PostsService {
     if (!deleted) {
       throw new PostNotFoundException(id);
     }
-    this.logger.log({ event: 'post.deleted', postId: id });
+    this.logger.log({ postId: id }, 'post.deleted');
   }
 }
