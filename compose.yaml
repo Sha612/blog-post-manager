@@ -1,5 +1,11 @@
 name: blog-post-manager
 
+# One command runs everything: docker compose up --build
+# Every setting has a local default, so no .env file is required.
+# These credentials are for local use only.
+
+x-database-url: &database-url postgresql://${POSTGRES_USER:-blog}:${POSTGRES_PASSWORD:-blog}@db:5432/${POSTGRES_DB:-blog}?schema=public
+
 services:
   db:
     image: postgres:17-alpine
@@ -17,6 +23,53 @@ services:
       interval: 3s
       timeout: 3s
       retries: 20
+
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: migrate
+    environment:
+      DATABASE_URL: *database-url
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: runtime
+    environment:
+      NODE_ENV: production
+      PORT: "4000"
+      DATABASE_URL: *database-url
+    ports:
+      - "${API_PORT:-4000}:4000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:4000/api/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      API_URL: http://api:4000/api
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   db-data:
